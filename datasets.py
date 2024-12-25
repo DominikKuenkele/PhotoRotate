@@ -11,6 +11,7 @@ from torchvision.models import ResNet101_Weights
 class Sample:
     image: Tensor
     label: Tensor
+    path: str
 
 
 class PhotoRotateDataset(Dataset):
@@ -46,7 +47,8 @@ class PhotoRotateDataset(Dataset):
                 preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(image)
                 self.samples.append(Sample(
                     image=preprocessed_image,
-                    label=torch.tensor(int(image.size[0]>image.size[1]))
+                    label=torch.tensor(int(image.size[0]>image.size[1])),
+                    path=jpg
                 ))
                 if len(self.samples) % 20 == 0:
                     print(f"Loaded {len(self.samples)} images...", end="\r")
