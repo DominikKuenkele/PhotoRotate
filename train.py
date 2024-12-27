@@ -1,15 +1,15 @@
 import argparse
-from models import PhotoRotateModel
-from datasets import PhotoRotateDataset, Sample
+import pickle
 from test import test
 
-import os
 import torch
-
-from torcheval.metrics import Mean
-
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
+from torcheval.metrics import Mean
+
+from datasets import Sample
+from models import PhotoRotateModel, ResnetFeatureExtractor
+
 
 def collate_fn(samples: list[Sample]):
     images = []
@@ -17,35 +17,32 @@ def collate_fn(samples: list[Sample]):
     for sample in samples:
         images.append(sample.image)
         labels.append(sample.label)
-    
-    return (
-        torch.stack(images),
-        torch.stack(labels)
-    )
+
+    return (torch.stack(images), torch.stack(labels))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
     parser.add_argument(
-        "--dataset_base_dir",
+        "--dataset_file",
         type=str,
-        help="Path to the base directory of all datasets",
-    )
-    parser.add_argument(
-        "--earliest_year", type=int, default=0, help="start dir"
-    )
-    parser.add_argument(
-        "--number_photos_per_subdir", type=int, default=50, help="start dir"
-    )
-    parser.add_argument(
-        "--max_samples", type=int, default=10_000, help="max samples to load"
+        help="Path to the extracted features",
     )
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
-    parser.add_argument("--lr", type=float, default=0.002, help="learning rate")
+    parser.add_argument("--lr", type=float, default=0.0002, help="learning rate")
     parser.add_argument("--device", type=str, default="cuda", help="cpu or cuda")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
+    parser.add_argument(
+        "--test_batch_size", type=int, default=256, help="test batch size"
+    )
+    parser.add_argument(
+        "--out_file",
+        type=str,
+        help="Path to the save file",
+    )
 
     args = parser.parse_args()
     print(args)
@@ -57,8 +54,8 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-
-    dataset = PhotoRotateDataset(args.dataset_base_dir, args.earliest_year, args.number_photos_per_subdir, args.max_samples)
+    with open(args.dataset_file, "rb") as f:
+        dataset = pickle.load(f)
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(
@@ -66,16 +63,32 @@ if __name__ == "__main__":
     )
 
     train_loader = DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=1,
+        collate_fn=collate_fn,
     )
     test_loader = DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn
+        test_dataset,
+        batch_size=args.test_batch_size,
+        shuffle=True,
+        num_workers=1,
+        collate_fn=collate_fn,
     )
 
-    model = PhotoRotateModel().to(device)
+    model = PhotoRotateModel(
+        ResnetFeatureExtractor(
+            pretrained=True,
+            fine_tune=False,
+            number_blocks=4,
+            avgpool=False,
+            fc=False,
+        )
+    ).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    loss_function = nn.BCEWithLogitsLoss()
+    loss_function = nn.CrossEntropyLoss()
 
     print(f"Batches per epoch: {len(train_loader)}")
     for epoch in range(args.epochs):
@@ -83,11 +96,11 @@ if __name__ == "__main__":
         model.train()
         for i, (inputs, labels) in enumerate(train_loader):
             model_input = inputs.to(device)
-            ground_truth = labels.to(device).unsqueeze(1)
+            ground_truth = labels.to(device)
 
             output = model(model_input)
 
-            loss = loss_function(output, ground_truth.float())
+            loss = loss_function(output, ground_truth)
             total_loss.update(loss)
 
             loss_string = f"epoch {epoch}, batch {i}: {total_loss.compute():.4f}"
@@ -100,4 +113,4 @@ if __name__ == "__main__":
         accuracy = test(model, test_loader, device)
         print(f"Accuracy: {accuracy.compute()}")
 
-    torch.save(model.state_dict(), os.path.join("out", "model.pth"))
+    torch.save(model.state_dict(), args.out_file)
