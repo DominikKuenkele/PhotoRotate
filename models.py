@@ -68,7 +68,13 @@ class PhotoRotateModel(nn.Module):
 
         self.model = nn.Sequential(
             resnet,
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(start_dim=1),
+            nn.LazyLinear(128),
             nn.Dropout(0.2),
             nn.ReLU(),
             nn.LazyLinear(4),
