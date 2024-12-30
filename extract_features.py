@@ -1,7 +1,37 @@
 import argparse
+import os
 import pickle
 
-from datasets import PhotoRotateDataset
+from attr import dataclass
+
+from datasets import (
+    DownscalingProcessor,
+    ImageProcessor,
+    ImageSelector,
+    PhotoRotateDataset,
+    TensorProcessor,
+)
+
+
+@dataclass
+class Dataset:
+    image_selector: ImageSelector
+    image_processor: ImageProcessor
+    image_processor_args: dict
+
+
+CONFIGURATIONS = {
+    "tensor": Dataset(
+        image_selector=ImageSelector,
+        image_processor=TensorProcessor,
+        image_processor_args={"rotate": True},
+    ),
+    "downscaling": Dataset(
+        image_selector=ImageSelector,
+        image_processor=DownscalingProcessor,
+        image_processor_args={"size": 256},
+    ),
+}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -11,30 +41,51 @@ if __name__ == "__main__":
         help="Path to the base directory of all datasets",
     )
     parser.add_argument("--earliest_year", type=int, default=0, help="start dir")
-    parser.add_argument("--latest_year", type=int, default=9999, help="start dir")
+    parser.add_argument("--latest_year", type=int, default=9999, help="last dir")
     parser.add_argument(
-        "--number_photos_per_subdir", type=int, default=50, help="start dir"
+        "--number_photos_per_event",
+        type=int,
+        default=50,
+        help="number of photos per event",
     )
     parser.add_argument(
         "--max_samples", type=int, default=10_000, help="max samples to load"
     )
     parser.add_argument(
-        "--out_file",
+        "--configuration", choices=CONFIGURATIONS.keys(), help="dataset configuration"
+    )
+    parser.add_argument(
+        "--out_dir",
         type=str,
-        help="Path to the save file",
+        help="Path to the out directory",
     )
 
     args = parser.parse_args()
     print(args)
 
+    dataset_configuration = CONFIGURATIONS[args.configuration]
+
+    image_selector_args = {
+        "base_dir": args.dataset_base_dir,
+        "earliest_year": args.earliest_year,
+        "latest_year": args.latest_year,
+        "number_photos_per_event_dir": args.number_photos_per_event,
+    }
+    image_selector = dataset_configuration.image_selector(**image_selector_args)
+
+    image_processor_args = {}
+    image_processor_args |= dataset_configuration.image_processor_args
+    image_processor = dataset_configuration.image_processor(**image_processor_args)
+
     dataset = PhotoRotateDataset(
-        args.dataset_base_dir,
-        args.number_photos_per_subdir,
-        args.max_samples,
-        True,
-        args.earliest_year,
-        args.latest_year,
+        image_selector=image_selector,
+        image_processor=image_processor,
+        max_samples=args.max_samples,
     )
 
-    with open(args.out_file, "wb") as f:
+    print("Saving...", end="\r")
+    file_name = f"dataset_{args.configuration}_{len(dataset)}.pickle"
+    file = os.path.join(args.out_dir, file_name)
+    with open(file, "wb") as f:
         pickle.dump(dataset, f)
+    print(f"Saved to {file_name}")
