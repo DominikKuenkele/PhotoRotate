@@ -20,6 +20,8 @@ def test(model, test_loader, device) -> metrics.MulticlassAccuracy:
 
 
 class Tester(abc.ABC):
+    def reset(self): ...
+
     def update(
         self,
         _prediction: torch.Tensor,
@@ -34,6 +36,9 @@ class MulticlassAccuracy(Tester):
         self.device = device
         self.metric = metrics.MulticlassAccuracy(device=device)
         self.name = "MulticlassAccuracy"
+
+    def reset(self):
+        self.metric.reset()
 
     def update(
         self,
@@ -51,6 +56,9 @@ class MulticlassConfusionMatrix(Tester):
         self.device = device
         self.metric = metrics.MulticlassConfusionMatrix(classes, device=device)
         self.name = "MulticlassConfusionMatrix"
+
+    def reset(self):
+        self.metric.reset()
 
     def update(
         self,

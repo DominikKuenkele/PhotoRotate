@@ -6,7 +6,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
-from callbacks import ConsoleLogger, ModelSaver
+from callbacks import ConsoleLogger, FileLogger, ModelSaver
 from datasets import Sample
 from models import PhotoRotateModel, ResnetFeatureExtractor
 from train import Trainer
@@ -108,8 +108,13 @@ if __name__ == "__main__":
         tester=[MulticlassAccuracy(device), MulticlassConfusionMatrix(4, device)],
         callbacks=[
             ConsoleLogger(),
+            FileLogger(
+                args.out_dir,
+                [len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
+            ),
             ModelSaver(
-                args.out_dir, [len(dataset), args.lr, args.dropout, args.suffix]
+                args.out_dir,
+                [len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
             ),
         ],
     )

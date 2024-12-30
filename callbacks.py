@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 
 class Callback(abc.ABC):
-    def on_train_begin(self, _train_data: DataLoader): ...
+    def on_train_begin(self, _model: nn.Module, _train_data: DataLoader): ...
 
     def on_train_end(self, _model: nn.Module): ...
 
@@ -29,7 +29,7 @@ class ConsoleLogger(Callback):
     def __init__(self):
         self.epoch = 0
 
-    def on_train_begin(self, train_data: DataLoader):
+    def on_train_begin(self, _model, train_data: DataLoader):
         print("--- Start training ---")
         print(f"Batches per epoch: {len(train_data)}")
         print()
@@ -52,13 +52,36 @@ class ConsoleLogger(Callback):
         print(loss_string, end="\r")
 
 
+class FileLogger(Callback):
+    def __init__(self, path: str, params: list[str]):
+        file_name = f"training-{'_'.join([str(param) for param in params if param is not None])}.log"
+        self.file = os.path.join(path, file_name)
+
+        with open(self.file, "w", encoding="utf-8"):
+            pass
+
+        self.epoch = 0
+
+    def on_train_begin(self, model: nn.Module, _train_data):
+        with open(self.file, "a", encoding="utf-8") as f:
+            f.write(f"{model}\n")
+
+    def on_epoch_begin(self, epoch):
+        self.epoch = epoch
+
+    def on_epoch_end(self, _epoch, train_loss, metrics: dict[str:float]):
+        loss_string = f"epoch {self.epoch}: {train_loss:.4f}"
+        with open(self.file, "a", encoding="utf-8") as f:
+            f.write(f"{loss_string}\n")
+            for metric, value in metrics.items():
+                f.write(f"{metric}: {value}\n")
+
+
 class ModelSaver(Callback):
     def __init__(self, path: str, params: list[str]):
-        self.path = path
-        self.params = [str(param) for param in params if param is not None]
+        file_name = f"model-{'_'.join([str(param) for param in params if param is not None])}.pth"
+        self.file = os.path.join(path, file_name)
 
     def on_train_end(self, model: nn.Module):
-        file_name = f"model-{'_'.join(self.params)}.pth"
-        out = os.path.join(self.path, file_name)
-        print(f"Saving model to {out}")
-        torch.save(model.state_dict(), out)
+        print(f"Saving model to {self.file}")
+        torch.save(model.state_dict(), self.file)

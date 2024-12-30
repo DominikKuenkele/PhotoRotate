@@ -32,7 +32,7 @@ class Trainer:
 
     def train(self, epochs: int):
         for callback in self.callbacks:
-            callback.on_train_begin(self.train_data)
+            callback.on_train_begin(self.model, self.train_data)
 
         for epoch in range(epochs):
             for callback in self.callbacks:
@@ -73,6 +73,9 @@ class Trainer:
 
     def test(self) -> dict[str : torch.Tensor]:
         self.model.eval()
+        for tester in self.tester:
+            tester.reset()
+
         for inputs, labels in self.test_data:
             model_input = inputs.to(self.device)
             ground_truth = labels.to(self.device)
