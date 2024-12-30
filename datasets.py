@@ -58,7 +58,7 @@ class PhotoRotateDataset(Dataset):
                 except OSError:
                     continue
 
-                orientaion_label = 0
+                orientation_label = 0
                 if rotate:
                     image = ImageOps.exif_transpose(image)
 
@@ -67,15 +67,25 @@ class PhotoRotateDataset(Dataset):
                     else:
                         possible_orientations = (90, 270)
 
+                    # TODO cropping, scaling
+                    # TODO propotions
                     selected_orientation = random.choice(possible_orientations)
-                    orientaion_label = ORIENTATION_LABELS[selected_orientation]
+                    orientation_label = ORIENTATION_LABELS[selected_orientation]
                     image = image.rotate(selected_orientation)
 
-                preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(image)
+                longer_side = max(image.size[0], image.size[1])
+                new_size = (longer_side, longer_side)
+                new_im = Image.new("RGB", new_size)
+                box = tuple((n - o) // 2 for n, o in zip(new_size, image.size))
+                new_im.paste(image, box)
+
+                preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(
+                    new_im
+                )
                 self.samples.append(
                     Sample(
                         image=preprocessed_image,
-                        label=torch.tensor(orientaion_label),
+                        label=torch.tensor(orientation_label),
                         path=jpg,
                     )
                 )

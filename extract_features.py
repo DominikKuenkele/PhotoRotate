@@ -11,6 +11,7 @@ if __name__ == "__main__":
         help="Path to the base directory of all datasets",
     )
     parser.add_argument("--earliest_year", type=int, default=0, help="start dir")
+    parser.add_argument("--latest_year", type=int, default=9999, help="start dir")
     parser.add_argument(
         "--number_photos_per_subdir", type=int, default=50, help="start dir"
     )
@@ -28,10 +29,11 @@ if __name__ == "__main__":
 
     dataset = PhotoRotateDataset(
         args.dataset_base_dir,
-        args.earliest_year,
         args.number_photos_per_subdir,
         args.max_samples,
         True,
+        args.earliest_year,
+        args.latest_year,
     )
 
     with open(args.out_file, "wb") as f:

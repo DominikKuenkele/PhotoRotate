@@ -63,7 +63,7 @@ class ResnetFeatureExtractor(nn.Module):
 
 
 class PhotoRotateModel(nn.Module):
-    def __init__(self, resnet: ResnetFeatureExtractor):
+    def __init__(self, resnet: ResnetFeatureExtractor, dropout: int):
         super().__init__()
 
         self.model = nn.Sequential(
@@ -75,7 +75,7 @@ class PhotoRotateModel(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(start_dim=1),
             nn.LazyLinear(128),
-            nn.Dropout(0.2),
+            nn.Dropout(dropout),
             nn.ReLU(),
             nn.LazyLinear(4),
             nn.Softmax(dim=1),
