@@ -157,6 +157,7 @@ class TensorProcessor(ImageProcessor):
 
         preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(new_im)
         
+        # data augmentation 01: random rotation
         random_rotation = T.RandomRotation(degrees=10)
         preprocessed_image = random_rotation(preprocessed_image)
 
