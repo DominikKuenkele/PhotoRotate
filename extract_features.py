@@ -1,8 +1,7 @@
 import argparse
 import os
 import pickle
-
-from attr import dataclass
+from dataclasses import dataclass
 
 from datasets import (
     DownscalingProcessor,
