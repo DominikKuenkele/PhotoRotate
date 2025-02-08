@@ -4,13 +4,14 @@ import pickle
 import random
 from dataclasses import dataclass
 
+import h5py
+import numpy as np
 import torch
+import torchvision.transforms as T
 from PIL import Image, ImageOps
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.models import ResNet101_Weights
-from traitlets import default
-import torchvision.transforms as T
 
 ORIENTATIONS = (0, 90, 180, 270)
 ORIENTATION_LABELS = {degree: index for index, degree in enumerate(ORIENTATIONS)}
@@ -110,7 +111,7 @@ class DatasetImageSelector:
         **_kwargs,
     ):
         with open(dataset_file, "rb") as f:
-            self.dataset: PhotoRotateDataset = pickle.load(f)
+            self.dataset: PhotoRotateDatasetNew = pickle.load(f)
 
     def select_images(self, number_images=100):
         return random.choices(self.dataset, k=number_images)
@@ -183,8 +184,21 @@ class Sample:
 
 
 class PhotoRotateDataset(Dataset):
+    def __init__(self):
+        super().__init__()
+
+        self.samples = []
+
+    def __len__(self):
+        return len(self.samples)
+    
+    def __getitem__(self, index):
+        return self.samples[index]
+
+class PhotoRotateDatasetNew(Dataset):
     def __init__(
         self,
+        file_name: str,
         image_selector: ImageSelector,
         image_processor: ImageProcessor,
         max_samples: int,
@@ -193,11 +207,16 @@ class PhotoRotateDataset(Dataset):
     ):
         super().__init__()
 
-        self.samples: list[Sample] = []
-
         selected_images = image_selector.select_images(max_samples)
+        self.num_samples = len(selected_images)
 
-        for sample in selected_images:
+        self.file_name = file_name
+        with h5py.File(self.file_name, "w") as f:
+            f.create_dataset("features", shape=(self.num_samples,3,224,224))
+            f.create_dataset("labels", shape=(self.num_samples,))
+            f.create_dataset("paths", shape=(self.num_samples,), dtype=h5py.string_dtype(encoding='utf-8'))
+
+        for i, sample in enumerate(selected_images):
             if isinstance(sample, str):
                 try:
                     image_path = sample
@@ -206,30 +225,41 @@ class PhotoRotateDataset(Dataset):
                     continue
             elif isinstance(sample, Sample):
                 image_path = sample.path
-                image: Image.Image = sample.image
+                image: Image.Image = sample.image.copy()
             else:
                 raise TypeError("type not supported")
 
             processed_image = image_processor.process(image)
-
-            self.samples.append(
+            self.save(
+                i,
                 Sample(
                     image=processed_image.image,
                     label=processed_image.label,
                     path=image_path,
-                )
+                ),
             )
 
-            if len(self.samples) % 20 == 0:
-                print(f"Processed {len(self.samples)} images...", end="\r")
+            if i % 20 == 0:
+                print(f"Processed {i} images...", end="\r")
 
         print("Done processing images.               ")
 
+    def save(self, index, sample: Sample):
+        with h5py.File(self.file_name, "a") as f:
+            f["features"][index] = sample.image
+            f["labels"][index] = sample.label
+            f["paths"][index] = sample.path.encode('utf-8')
+
     def __getitem__(self, index: int) -> Sample:
-        return self.samples[index]
+        with h5py.File(self.file_name, "r") as f:
+            return Sample(
+                image=f["features"][index],
+                label=f["labels"][index],
+                path=f["paths"][index],
+            )
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return self.num_samples
 
 
 def hasJpegs(directory: str, threshold: int) -> bool:
