@@ -9,6 +9,7 @@ from PIL import Image, ImageOps
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.models import ResNet101_Weights
+from traitlets import default
 
 ORIENTATIONS = (0, 90, 180, 270)
 ORIENTATION_LABELS = {degree: index for index, degree in enumerate(ORIENTATIONS)}
@@ -192,7 +193,6 @@ class PhotoRotateDataset(Dataset):
         selected_images = image_selector.select_images(max_samples)
 
         for sample in selected_images:
-
             if isinstance(sample, str):
                 try:
                     image_path = sample
@@ -202,6 +202,8 @@ class PhotoRotateDataset(Dataset):
             elif isinstance(sample, Sample):
                 image_path = sample.path
                 image: Image.Image = sample.image
+            else:
+                raise TypeError("type not supported")
 
             processed_image = image_processor.process(image)
 
