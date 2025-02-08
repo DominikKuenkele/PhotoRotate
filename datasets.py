@@ -149,6 +149,10 @@ class TensorProcessor(ImageProcessor):
             orientation_label = ORIENTATION_LABELS[selected_orientation]
             image = image.rotate(selected_orientation)
 
+        # data augmentation 01: random rotation
+        random_rotation = T.RandomRotation(degrees=10)
+        image = random_rotation(image)
+        
         longer_side = max(image.size[0], image.size[1])
         new_size = (longer_side, longer_side)
         new_im = Image.new("RGB", new_size)
@@ -156,11 +160,6 @@ class TensorProcessor(ImageProcessor):
         new_im.paste(image, box)
 
         preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(new_im)
-        
-        # data augmentation 01: random rotation
-        random_rotation = T.RandomRotation(degrees=10)
-        preprocessed_image = random_rotation(preprocessed_image)
-
 
         return ProcessedImage(
             image=preprocessed_image, label=torch.tensor(orientation_label)
