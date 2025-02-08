@@ -4,6 +4,7 @@ import pickle
 from dataclasses import dataclass
 
 from datasets import (
+    DatasetImageSelector,
     DownscalingProcessor,
     ImageProcessor,
     ImageSelector,
@@ -30,6 +31,11 @@ CONFIGURATIONS = {
         image_processor=DownscalingProcessor,
         image_processor_args={"size": 256},
     ),
+    "dataset": Dataset(
+        image_selector=DatasetImageSelector,
+        image_processor=TensorProcessor,
+        image_processor_args={"rotate": True},
+    ),
 }
 
 if __name__ == "__main__":
@@ -46,6 +52,11 @@ if __name__ == "__main__":
         type=int,
         default=50,
         help="number of photos per event",
+    )
+    parser.add_argument(
+        "--dataset_file",
+        type=str,
+        help="file to pickle PhotoRotateDataset",
     )
     parser.add_argument(
         "--max_samples", type=int, default=10_000, help="max samples to load"
@@ -69,6 +80,7 @@ if __name__ == "__main__":
         "earliest_year": args.earliest_year,
         "latest_year": args.latest_year,
         "number_photos_per_event_dir": args.number_photos_per_event,
+        "dataset_file": args.dataset_file,
     }
     image_selector = dataset_configuration.image_selector(**image_selector_args)
 

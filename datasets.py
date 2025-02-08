@@ -1,5 +1,6 @@
 import abc
 import os
+import pickle
 import random
 from dataclasses import dataclass
 
@@ -99,6 +100,20 @@ class ImageSelector:
         return list(image_paths)
 
 
+class DatasetImageSelector:
+    def __init__(
+        self,
+        dataset_file: str,
+        *_args,
+        **_kwargs,
+    ):
+        with open(dataset_file, "rb") as f:
+            self.dataset: PhotoRotateDataset = pickle.load(f)
+
+    def select_images(self, number_images=100):
+        return random.choices(self.dataset, k=number_images)
+
+
 @dataclass
 class ProcessedImage:
     image: any
@@ -176,11 +191,17 @@ class PhotoRotateDataset(Dataset):
 
         selected_images = image_selector.select_images(max_samples)
 
-        for image_path in selected_images:
-            try:
-                image = Image.open(image_path).convert("RGB")
-            except OSError:
-                continue
+        for sample in selected_images:
+
+            if isinstance(sample, str):
+                try:
+                    image_path = sample
+                    image = Image.open(image_path).convert("RGB")
+                except OSError:
+                    continue
+            elif isinstance(sample, Sample):
+                image_path = sample.path
+                image: Image.Image = sample.image
 
             processed_image = image_processor.process(image)
 
