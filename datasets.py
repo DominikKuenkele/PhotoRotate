@@ -10,6 +10,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.models import ResNet101_Weights
 from traitlets import default
+import torchvision.transforms as T
 
 ORIENTATIONS = (0, 90, 180, 270)
 ORIENTATION_LABELS = {degree: index for index, degree in enumerate(ORIENTATIONS)}
@@ -155,6 +156,10 @@ class TensorProcessor(ImageProcessor):
         new_im.paste(image, box)
 
         preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(new_im)
+        
+        random_rotation = T.RandomRotation(degrees=10)
+        preprocessed_image = random_rotation(preprocessed_image)
+
 
         return ProcessedImage(
             image=preprocessed_image, label=torch.tensor(orientation_label)
