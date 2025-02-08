@@ -3,14 +3,11 @@ import os
 import pickle
 from dataclasses import dataclass
 
-from datasets import (
-    DatasetImageSelector,
-    DownscalingProcessor,
-    ImageProcessor,
-    ImageSelector,
-    PhotoRotateDataset,
-    TensorProcessor,
-)
+import h5py
+
+from datasets import (DatasetImageSelector, DownscalingProcessor,
+                      ImageProcessor, ImageSelector, PhotoRotateDatasetNew,
+                      TensorProcessor)
 
 
 @dataclass
@@ -88,15 +85,11 @@ if __name__ == "__main__":
     image_processor_args |= dataset_configuration.image_processor_args
     image_processor = dataset_configuration.image_processor(**image_processor_args)
 
-    dataset = PhotoRotateDataset(
+    file_name = f"dataset_{args.configuration}_{args.max_samples}.h5"
+    dataset = PhotoRotateDatasetNew(
+        file_name=os.path.join(args.out_dir, file_name),
         image_selector=image_selector,
         image_processor=image_processor,
         max_samples=args.max_samples,
     )
 
-    print("Saving...", end="\r")
-    file_name = f"dataset_{args.configuration}_{len(dataset)}.pickle"
-    file = os.path.join(args.out_dir, file_name)
-    with open(file, "wb") as f:
-        pickle.dump(dataset, f)
-    print(f"Saved to {file_name}")
