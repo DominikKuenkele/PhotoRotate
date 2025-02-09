@@ -1,0 +1,76 @@
+PhotoRotateModel(
+  (model): Sequential(
+    (0): ResnetFeatureExtractor(self.pretrained=True, self.fine_tune=False, self.number_blocks=4, self.avgpool=0, self.fc=False)
+    (1): LazyConv2d(0, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (2): ReLU()
+    (3): LazyConv2d(0, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (4): ReLU()
+    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (6): Flatten(start_dim=1, end_dim=-1)
+    (7): LazyLinear(in_features=0, out_features=128, bias=True)
+    (8): Dropout(p=0.2, inplace=False)
+    (9): ReLU()
+    (10): LazyLinear(in_features=0, out_features=4, bias=True)
+    (11): Softmax(dim=1)
+  )
+)
+epoch 0: 0.8828
+MulticlassAccuracy: 0.8927381634712219
+MulticlassConfusionMatrix: tensor([[2.0350e+03, 1.0000e+01, 1.2000e+02, 3.0000e+00],
+        [0.0000e+00, 8.3000e+02, 2.0000e+00, 5.0000e+01],
+        [1.5200e+02, 2.0000e+00, 1.9220e+03, 2.0000e+00],
+        [0.0000e+00, 3.0300e+02, 0.0000e+00, 5.7300e+02]], device='cuda:0')
+epoch 1: 0.8254
+MulticlassAccuracy: 0.8555962443351746
+MulticlassConfusionMatrix: tensor([[1869.,   11.,  288.,    0.],
+        [  45.,  681.,   35.,  121.],
+        [  87.,    4., 1983.,    4.],
+        [  45.,  201.,   26.,  604.]], device='cuda:0')
+epoch 2: 0.8083
+MulticlassAccuracy: 0.9102265238761902
+MulticlassConfusionMatrix: tensor([[2.0020e+03, 1.0000e+00, 1.6500e+02, 0.0000e+00],
+        [3.0000e+00, 8.3400e+02, 4.0000e+00, 4.1000e+01],
+        [7.2000e+01, 0.0000e+00, 2.0060e+03, 0.0000e+00],
+        [4.0000e+00, 2.4700e+02, 2.0000e+00, 6.2300e+02]], device='cuda:0')
+epoch 3: 0.8000
+MulticlassAccuracy: 0.9312125444412231
+MulticlassConfusionMatrix: tensor([[2.0490e+03, 0.0000e+00, 1.1800e+02, 1.0000e+00],
+        [2.0000e+00, 8.0700e+02, 1.0000e+00, 7.2000e+01],
+        [9.8000e+01, 0.0000e+00, 1.9800e+03, 0.0000e+00],
+        [2.0000e+00, 1.1800e+02, 1.0000e+00, 7.5500e+02]], device='cuda:0')
+epoch 4: 0.7919
+MulticlassAccuracy: 0.9155563116073608
+MulticlassConfusionMatrix: tensor([[2.1050e+03, 1.0000e+00, 6.2000e+01, 0.0000e+00],
+        [3.0000e+00, 7.0000e+02, 0.0000e+00, 1.7900e+02],
+        [2.0100e+02, 0.0000e+00, 1.8770e+03, 0.0000e+00],
+        [2.0000e+00, 5.9000e+01, 0.0000e+00, 8.1500e+02]], device='cuda:0')
+epoch 5: 0.7879
+MulticlassAccuracy: 0.9298800826072693
+MulticlassConfusionMatrix: tensor([[2.0590e+03, 1.0000e+00, 1.0700e+02, 1.0000e+00],
+        [1.0000e+00, 7.5000e+02, 0.0000e+00, 1.3100e+02],
+        [9.0000e+01, 1.0000e+00, 1.9850e+03, 2.0000e+00],
+        [0.0000e+00, 8.7000e+01, 0.0000e+00, 7.8900e+02]], device='cuda:0')
+epoch 6: 0.7825
+MulticlassAccuracy: 0.9398733973503113
+MulticlassConfusionMatrix: tensor([[2.0610e+03, 0.0000e+00, 1.0600e+02, 1.0000e+00],
+        [1.0000e+00, 7.8000e+02, 0.0000e+00, 1.0100e+02],
+        [6.9000e+01, 2.0000e+00, 2.0060e+03, 1.0000e+00],
+        [2.0000e+00, 7.8000e+01, 0.0000e+00, 7.9600e+02]], device='cuda:0')
+epoch 7: 0.7780
+MulticlassAccuracy: 0.9415389895439148
+MulticlassConfusionMatrix: tensor([[2.0600e+03, 2.0000e+00, 1.0500e+02, 1.0000e+00],
+        [0.0000e+00, 8.0900e+02, 0.0000e+00, 7.3000e+01],
+        [8.3000e+01, 1.0000e+00, 1.9940e+03, 0.0000e+00],
+        [0.0000e+00, 8.6000e+01, 0.0000e+00, 7.9000e+02]], device='cuda:0')
+epoch 8: 0.7760
+MulticlassAccuracy: 0.9455363154411316
+MulticlassConfusionMatrix: tensor([[2.0730e+03, 1.0000e+00, 9.4000e+01, 0.0000e+00],
+        [1.0000e+00, 8.0400e+02, 0.0000e+00, 7.7000e+01],
+        [6.2000e+01, 1.0000e+00, 2.0150e+03, 0.0000e+00],
+        [0.0000e+00, 9.1000e+01, 0.0000e+00, 7.8500e+02]], device='cuda:0')
+epoch 9: 0.7727
+MulticlassAccuracy: 0.9453697800636292
+MulticlassConfusionMatrix: tensor([[2.0770e+03, 1.0000e+00, 9.0000e+01, 0.0000e+00],
+        [1.0000e+00, 8.0200e+02, 0.0000e+00, 7.9000e+01],
+        [6.8000e+01, 0.0000e+00, 2.0100e+03, 0.0000e+00],
+        [0.0000e+00, 8.9000e+01, 0.0000e+00, 7.8700e+02]], device='cuda:0')

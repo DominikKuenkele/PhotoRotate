@@ -1,0 +1,76 @@
+PhotoRotateModel(
+  (model): Sequential(
+    (0): ResnetFeatureExtractor(self.pretrained=True, self.fine_tune=False, self.number_blocks=4, self.avgpool=0, self.fc=False)
+    (1): LazyConv2d(0, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (2): ReLU()
+    (3): LazyConv2d(0, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (4): ReLU()
+    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (6): Flatten(start_dim=1, end_dim=-1)
+    (7): LazyLinear(in_features=0, out_features=128, bias=True)
+    (8): Dropout(p=0.2, inplace=False)
+    (9): ReLU()
+    (10): LazyLinear(in_features=0, out_features=4, bias=True)
+    (11): Softmax(dim=1)
+  )
+)
+epoch 0: 0.9018
+MulticlassAccuracy: 0.8894070386886597
+MulticlassConfusionMatrix: tensor([[1.9030e+03, 8.0000e+00, 2.3100e+02, 1.0000e+00],
+        [0.0000e+00, 8.3800e+02, 1.0000e+00, 3.5000e+01],
+        [7.2000e+01, 5.0000e+00, 2.0030e+03, 0.0000e+00],
+        [0.0000e+00, 3.1100e+02, 0.0000e+00, 5.9600e+02]], device='cuda:0')
+epoch 1: 0.8347
+MulticlassAccuracy: 0.9062291979789734
+MulticlassConfusionMatrix: tensor([[2.0270e+03, 3.0000e+00, 1.1200e+02, 1.0000e+00],
+        [0.0000e+00, 7.4900e+02, 0.0000e+00, 1.2500e+02],
+        [1.6600e+02, 3.0000e+00, 1.9100e+03, 1.0000e+00],
+        [0.0000e+00, 1.5100e+02, 1.0000e+00, 7.5500e+02]], device='cuda:0')
+epoch 2: 0.8203
+MulticlassAccuracy: 0.9078947305679321
+MulticlassConfusionMatrix: tensor([[1.9400e+03, 4.0000e+00, 1.9800e+02, 1.0000e+00],
+        [0.0000e+00, 7.7300e+02, 0.0000e+00, 1.0100e+02],
+        [8.4000e+01, 5.0000e+00, 1.9900e+03, 1.0000e+00],
+        [0.0000e+00, 1.5800e+02, 1.0000e+00, 7.4800e+02]], device='cuda:0')
+epoch 3: 0.8083
+MulticlassAccuracy: 0.9037308692932129
+MulticlassConfusionMatrix: tensor([[1.9810e+03, 3.3000e+01, 1.2800e+02, 1.0000e+00],
+        [0.0000e+00, 7.6800e+02, 0.0000e+00, 1.0600e+02],
+        [1.2000e+02, 1.3000e+01, 1.9430e+03, 4.0000e+00],
+        [0.0000e+00, 1.7300e+02, 0.0000e+00, 7.3400e+02]], device='cuda:0')
+epoch 4: 0.8030
+MulticlassAccuracy: 0.9137241840362549
+MulticlassConfusionMatrix: tensor([[2.0450e+03, 2.0000e+00, 9.5000e+01, 1.0000e+00],
+        [0.0000e+00, 7.6300e+02, 0.0000e+00, 1.1100e+02],
+        [1.5400e+02, 2.0000e+00, 1.9230e+03, 1.0000e+00],
+        [0.0000e+00, 1.5100e+02, 1.0000e+00, 7.5500e+02]], device='cuda:0')
+epoch 5: 0.7938
+MulticlassAccuracy: 0.9187208414077759
+MulticlassConfusionMatrix: tensor([[2.0370e+03, 1.0000e+00, 1.0400e+02, 1.0000e+00],
+        [0.0000e+00, 7.7700e+02, 0.0000e+00, 9.7000e+01],
+        [1.3300e+02, 1.0000e+00, 1.9450e+03, 1.0000e+00],
+        [1.0000e+00, 1.4700e+02, 2.0000e+00, 7.5700e+02]], device='cuda:0')
+epoch 6: 0.7891
+MulticlassAccuracy: 0.9148900508880615
+MulticlassConfusionMatrix: tensor([[2.0500e+03, 2.0000e+00, 9.0000e+01, 1.0000e+00],
+        [0.0000e+00, 7.4400e+02, 1.0000e+00, 1.2900e+02],
+        [1.6900e+02, 1.0000e+00, 1.9070e+03, 3.0000e+00],
+        [1.0000e+00, 1.1300e+02, 1.0000e+00, 7.9200e+02]], device='cuda:0')
+epoch 7: 0.7854
+MulticlassAccuracy: 0.9223850965499878
+MulticlassConfusionMatrix: tensor([[1.9840e+03, 0.0000e+00, 1.5800e+02, 1.0000e+00],
+        [2.0000e+00, 7.8000e+02, 2.0000e+00, 9.0000e+01],
+        [7.7000e+01, 0.0000e+00, 2.0020e+03, 1.0000e+00],
+        [0.0000e+00, 1.3300e+02, 2.0000e+00, 7.7200e+02]], device='cuda:0')
+epoch 8: 0.7797
+MulticlassAccuracy: 0.9158893823623657
+MulticlassConfusionMatrix: tensor([[2.0240e+03, 6.0000e+00, 1.0600e+02, 7.0000e+00],
+        [0.0000e+00, 7.1900e+02, 0.0000e+00, 1.5500e+02],
+        [1.3100e+02, 6.0000e+00, 1.9410e+03, 2.0000e+00],
+        [0.0000e+00, 9.2000e+01, 0.0000e+00, 8.1500e+02]], device='cuda:0')
+epoch 9: 0.7781
+MulticlassAccuracy: 0.9110593199729919
+MulticlassConfusionMatrix: tensor([[1.9200e+03, 4.0000e+00, 2.1800e+02, 1.0000e+00],
+        [1.0000e+00, 6.9400e+02, 1.0000e+00, 1.7800e+02],
+        [6.0000e+01, 0.0000e+00, 2.0200e+03, 0.0000e+00],
+        [2.0000e+00, 6.8000e+01, 1.0000e+00, 8.3600e+02]], device='cuda:0')
