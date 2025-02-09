@@ -1,0 +1,19 @@
+PhotoRotateAttentionModel(
+  (model): Sequential(
+    (0): ResnetFeatureExtractor(self.pretrained=True, self.fine_tune=False, self.number_blocks=4, self.avgpool=0, self.fc=False)
+    (1): AttentionModule(
+      (attention_weights): Sequential(
+        (0): LazyLinear(in_features=0, out_features=128, bias=True)
+        (1): Tanh()
+        (2): LazyLinear(in_features=0, out_features=1, bias=True)
+        (3): Softmax(dim=1)
+      )
+    )
+    (2): Flatten(start_dim=1, end_dim=-1)
+    (3): LazyLinear(in_features=0, out_features=128, bias=True)
+    (4): Dropout(p=0.2, inplace=False)
+    (5): ReLU()
+    (6): LazyLinear(in_features=0, out_features=4, bias=True)
+    (7): Softmax(dim=1)
+  )
+)
