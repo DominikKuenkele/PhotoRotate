@@ -41,11 +41,11 @@ def predict():
 
             preprocessed_image = ResNet101_Weights.IMAGENET1K_V2.transforms()(new_im)
             
-            image = image.unsqueeze(0)  # Batch-Dimension hinzufügen
+            image_final = preprocessed_image.unsqueeze(0)  # Batch-Dimension hinzufügen
 
             # Inferenz
             with torch.no_grad():
-                output = model(image)
+                output = model(image_final)
                 _, predicted_class = torch.argmax(output, 1)
 
             # Ergebnis zurückgeben
