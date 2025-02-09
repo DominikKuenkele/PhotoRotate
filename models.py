@@ -63,8 +63,8 @@ class ResnetFeatureExtractor(nn.Module):
 
 
 class PhotoRotateModel(nn.Module):
-    def __init__(self, resnet: ResnetFeatureExtractor, dropout: int):
-        super().__init__()
+    def __init__(self, resnet: ResnetFeatureExtractor, dropout: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.model = nn.Sequential(
             resnet,
@@ -73,6 +73,47 @@ class PhotoRotateModel(nn.Module):
             nn.LazyConv2d(128, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(start_dim=1),
+            nn.LazyLinear(128),
+            nn.Dropout(dropout),
+            nn.ReLU(),
+            nn.LazyLinear(4),
+            nn.Softmax(dim=1),
+        )
+
+    def forward(self, data):
+        return self.model(data)
+
+
+class AttentionModule(nn.Module):
+    def __init__(self, attention_dim):
+        super().__init__()
+
+        self.attention_weights = nn.Sequential(
+            nn.LazyLinear(attention_dim), nn.Tanh(), nn.LazyLinear(1), nn.Softmax(dim=1)
+        )
+
+    def forward(self, features):
+        attention_weights = self.attention_weights(features)
+        attended_features = features * attention_weights
+
+        return attended_features.sum(dim=1)
+
+
+class PhotoRotateAttentionModel(nn.Module):
+    def __init__(
+        self,
+        resnet: ResnetFeatureExtractor,
+        dropout: int,
+        *args,
+        attention_dims: int = 128,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        self.model = nn.Sequential(
+            resnet,
+            AttentionModule(attention_dim=attention_dims),
             nn.Flatten(start_dim=1),
             nn.LazyLinear(128),
             nn.Dropout(dropout),

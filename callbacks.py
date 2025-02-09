@@ -85,7 +85,9 @@ class FileLogger(Callback):
 
 
 class ModelSaver(Callback):
-    def __init__(self, path: str, params: list[str]):
+    def __init__(self, path: str, params: list[str], as_state_dict: bool):
+        self.as_state_dict = as_state_dict
+        
         file_name = f"model_{'_'.join([str(param) for param in params if param is not None])}"
 
         suffix = 0
@@ -99,4 +101,7 @@ class ModelSaver(Callback):
 
     def on_train_end(self, model: nn.Module):
         print(f"Saving model to {self.file}")
-        torch.save(model.state_dict(), self.file)
+        if self.as_state_dict:
+            torch.save(model.state_dict(), self.file)
+        else:
+            torch.save(model, self.file)
