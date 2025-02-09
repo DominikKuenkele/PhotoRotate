@@ -10,10 +10,13 @@ app = Flask(__name__)
 # Argument Parser
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_path", type=str, help="path to the inference model")
+parser.add_argument("--device", type=str, help="cpu or cuda")
 args = parser.parse_args()
 
 # Modell laden (ersetze 'dein_modell.pth' mit dem Pfad zu deinem Modell)
-model = torch.load(args.model_path)
+model = torch.load(
+    args.model_path, weights_only=False, map_location=torch.device(args.device)
+)
 model.eval()  # Wichtig für Inferenz
 
 
@@ -56,4 +59,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
