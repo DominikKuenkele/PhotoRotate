@@ -1,4 +1,7 @@
 __pycache__/
-out/
-.vscode/
+
 .conda
+out/*
+!out/*.log
+!out/*.pth
+.vscode/
