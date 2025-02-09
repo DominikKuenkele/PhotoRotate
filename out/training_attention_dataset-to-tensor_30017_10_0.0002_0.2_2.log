@@ -1,0 +1,79 @@
+PhotoRotateAttentionModel(
+  (model): Sequential(
+    (0): ResnetFeatureExtractor(self.pretrained=True, self.fine_tune=False, self.number_blocks=4, self.avgpool=0, self.fc=False)
+    (1): AttentionModule(
+      (attention_weights): Sequential(
+        (0): LazyLinear(in_features=0, out_features=128, bias=True)
+        (1): Tanh()
+        (2): LazyLinear(in_features=0, out_features=1, bias=True)
+        (3): Softmax(dim=1)
+      )
+    )
+    (2): Flatten(start_dim=1, end_dim=-1)
+    (3): LazyLinear(in_features=0, out_features=128, bias=True)
+    (4): Dropout(p=0.2, inplace=False)
+    (5): ReLU()
+    (6): LazyLinear(in_features=0, out_features=4, bias=True)
+    (7): Softmax(dim=1)
+  )
+)
+epoch 0: 1.1760
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 1: 1.0899
+MulticlassAccuracy: 0.3462691605091095
+MulticlassConfusionMatrix: tensor([[   0.,    0., 2124.,    0.],
+        [   0.,    0.,  882.,    0.],
+        [   0.,    0., 2079.,    0.],
+        [   0.,    0.,  919.,    0.]], device='cuda:0')
+epoch 2: 1.0754
+MulticlassAccuracy: 0.3462691605091095
+MulticlassConfusionMatrix: tensor([[   0.,    0., 2124.,    0.],
+        [   0.,    0.,  882.,    0.],
+        [   0.,    0., 2079.,    0.],
+        [   0.,    0.,  919.,    0.]], device='cuda:0')
+epoch 3: 1.0665
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 4: 1.0606
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 5: 1.0548
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 6: 1.0494
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 7: 1.0459
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 8: 1.0427
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
+epoch 9: 1.0401
+MulticlassAccuracy: 0.353764146566391
+MulticlassConfusionMatrix: tensor([[2124.,    0.,    0.,    0.],
+        [ 882.,    0.,    0.,    0.],
+        [2079.,    0.,    0.,    0.],
+        [ 919.,    0.,    0.,    0.]], device='cuda:0')
