@@ -28,12 +28,12 @@ CONFIGURATIONS = {
         image_processor=DownscalingProcessor,
         image_processor_args={"size": 256},
     ),
-    "dataset_to_tensor": Dataset(
+    "dataset-to-tensor": Dataset(
         image_selector=DatasetImageSelector,    
         image_processor=TensorProcessor,
         image_processor_args={"rotate": True, "augment": False},
     ),
-    "dataset_to_tensor_augment": Dataset(
+    "dataset-to-tensor-augment": Dataset(
         image_selector=DatasetImageSelector,
         image_processor=TensorProcessor,
         image_processor_args={"rotate": True, "augment": True},
