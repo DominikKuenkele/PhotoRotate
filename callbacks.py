@@ -54,9 +54,16 @@ class ConsoleLogger(Callback):
 
 class FileLogger(Callback):
     def __init__(self, path: str, params: list[str]):
-        file_name = f"training-{'_'.join([str(param) for param in params if param is not None])}.log"
+        file_name = f"training_{'_'.join([str(param) for param in params if param is not None])}"
         self.file = os.path.join(path, file_name)
+        
+        suffix = 0
+        while os.path.exists(os.path.join(path, f"{file_name}.log")):
+            file_name = file_name.removesuffix(f"_{str(suffix)}")
+            suffix+=1
+            file_name += f"_{str(suffix)}"
 
+        self.file = os.path.join(path, f"{file_name}.log")
         with open(self.file, "w", encoding="utf-8"):
             pass
 
@@ -79,8 +86,16 @@ class FileLogger(Callback):
 
 class ModelSaver(Callback):
     def __init__(self, path: str, params: list[str]):
-        file_name = f"model-{'_'.join([str(param) for param in params if param is not None])}.pth"
-        self.file = os.path.join(path, file_name)
+        file_name = f"model_{'_'.join([str(param) for param in params if param is not None])}"
+
+        suffix = 0
+        while os.path.exists(os.path.join(path, f"{file_name}.pth")):
+            file_name = file_name.removesuffix(f"_{str(suffix)}")
+            suffix+=1
+            file_name += f"_{str(suffix)}"
+
+        self.file = os.path.join(path, f"{file_name}.pth")
+
 
     def on_train_end(self, model: nn.Module):
         print(f"Saving model to {self.file}")
