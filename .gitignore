@@ -1,4 +1,6 @@
 __pycache__/
+
+.conda
 out/*
 !out/*.log
 !out/*.pth
