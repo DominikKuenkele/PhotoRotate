@@ -1,13 +1,15 @@
 import argparse
 import os
-import pickle
 from dataclasses import dataclass
 
-import h5py
-
-from datasets import (DatasetImageSelector, DownscalingProcessor,
-                      ImageProcessor, ImageSelector, PhotoRotateDatasetH5,
-                      TensorProcessor)
+from datasets import (
+    DatasetImageSelector,
+    DownscalingProcessor,
+    ImageProcessor,
+    ImageSelector,
+    PhotoRotateDatasetH5,
+    TensorProcessor,
+)
 
 
 @dataclass
@@ -29,7 +31,7 @@ CONFIGURATIONS = {
         image_processor_args={"size": 256},
     ),
     "dataset-to-tensor": Dataset(
-        image_selector=DatasetImageSelector,    
+        image_selector=DatasetImageSelector,
         image_processor=TensorProcessor,
         image_processor_args={"rotate": True, "augment": False},
     ),
@@ -97,4 +99,3 @@ if __name__ == "__main__":
         image_processor=image_processor,
         max_samples=args.max_samples,
     )
-
