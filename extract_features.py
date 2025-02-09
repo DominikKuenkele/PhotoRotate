@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import h5py
 
 from datasets import (DatasetImageSelector, DownscalingProcessor,
-                      ImageProcessor, ImageSelector, PhotoRotateDatasetNew,
+                      ImageProcessor, ImageSelector, PhotoRotateDatasetH5,
                       TensorProcessor)
 
 
@@ -28,10 +28,15 @@ CONFIGURATIONS = {
         image_processor=DownscalingProcessor,
         image_processor_args={"size": 256},
     ),
-    "dataset": Dataset(
+    "dataset_to_tensor": Dataset(
+        image_selector=DatasetImageSelector,    
+        image_processor=TensorProcessor,
+        image_processor_args={"rotate": True, "augment": False},
+    ),
+    "dataset_to_tensor_augment": Dataset(
         image_selector=DatasetImageSelector,
         image_processor=TensorProcessor,
-        image_processor_args={"rotate": True},
+        image_processor_args={"rotate": True, "augment": True},
     ),
 }
 
@@ -86,7 +91,7 @@ if __name__ == "__main__":
     image_processor = dataset_configuration.image_processor(**image_processor_args)
 
     file_name = f"dataset_{args.configuration}_{args.max_samples}.h5"
-    dataset = PhotoRotateDatasetNew(
+    dataset = PhotoRotateDatasetH5.load_data(
         file_name=os.path.join(args.out_dir, file_name),
         image_selector=image_selector,
         image_processor=image_processor,

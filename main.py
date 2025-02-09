@@ -7,7 +7,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
 from callbacks import ConsoleLogger, FileLogger, ModelSaver
-from datasets import Sample
+from datasets import PhotoRotateDataset, PhotoRotateDatasetH5, Sample
 from models import PhotoRotateModel, ResnetFeatureExtractor
 from train import Trainer
 
@@ -61,8 +61,7 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    with open(args.dataset_file, "rb") as f:
-        dataset = pickle.load(f)
+    dataset = PhotoRotateDatasetH5(args.dataset_file)
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(
@@ -110,11 +109,11 @@ if __name__ == "__main__":
             ConsoleLogger(),
             FileLogger(
                 args.out_dir,
-                [len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
+                [dataset.name, len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
             ),
             ModelSaver(
                 args.out_dir,
-                [len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
+                [dataset.name, len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
             ),
         ],
     )

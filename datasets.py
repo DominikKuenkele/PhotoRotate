@@ -5,7 +5,6 @@ import random
 from dataclasses import dataclass
 
 import h5py
-import numpy as np
 import torch
 import torchvision.transforms as T
 from PIL import Image, ImageOps
@@ -111,7 +110,7 @@ class DatasetImageSelector:
         **_kwargs,
     ):
         with open(dataset_file, "rb") as f:
-            self.dataset: PhotoRotateDatasetNew = pickle.load(f)
+            self.dataset: PhotoRotateDataset = pickle.load(f)
 
     def select_images(self, number_images=100):
         return random.choices(self.dataset, k=number_images)
@@ -131,10 +130,12 @@ class TensorProcessor(ImageProcessor):
     def __init__(
         self,
         rotate: bool,
+        augment: bool,
         *_args,
         **_kwargs,
     ):
         self.rotate = rotate
+        self.augment = augment
 
     def process(self, image: Image.Image) -> ProcessedImage:
         orientation_label = 0
@@ -150,9 +151,10 @@ class TensorProcessor(ImageProcessor):
             orientation_label = ORIENTATION_LABELS[selected_orientation]
             image = image.rotate(selected_orientation)
 
-        # data augmentation 01: random rotation
-        random_rotation = T.RandomRotation(degrees=10)
-        image = random_rotation(image)
+        if self.augment:
+            # data augmentation 01: random rotation
+            random_rotation = T.RandomRotation(degrees=10)
+            image = random_rotation(image)
         
         longer_side = max(image.size[0], image.size[1])
         new_size = (longer_side, longer_side)
@@ -195,9 +197,17 @@ class PhotoRotateDataset(Dataset):
     def __getitem__(self, index):
         return self.samples[index]
 
-class PhotoRotateDatasetNew(Dataset):
-    def __init__(
-        self,
+class PhotoRotateDatasetH5(Dataset):
+    def __init__(self, file_name: str):
+        super().__init__()
+        self.name = file_name.split("_")[1]
+        self.file_name = file_name
+        with h5py.File(self.file_name, "r") as f:
+            self.num_samples = len(f["features"])
+
+    @classmethod
+    def load_data(
+        cls,
         file_name: str,
         image_selector: ImageSelector,
         image_processor: ImageProcessor,
@@ -205,16 +215,13 @@ class PhotoRotateDatasetNew(Dataset):
         *_args,
         **_kwargs,
     ):
-        super().__init__()
-
         selected_images = image_selector.select_images(max_samples)
-        self.num_samples = len(selected_images)
+        num_samples = len(selected_images)
 
-        self.file_name = file_name
-        with h5py.File(self.file_name, "w") as f:
-            f.create_dataset("features", shape=(self.num_samples,3,224,224))
-            f.create_dataset("labels", shape=(self.num_samples,))
-            f.create_dataset("paths", shape=(self.num_samples,), dtype=h5py.string_dtype(encoding='utf-8'))
+        with h5py.File(file_name, "w") as f:
+            f.create_dataset("features", shape=(num_samples,3,224,224))
+            f.create_dataset("labels", shape=(num_samples,))
+            f.create_dataset("paths", shape=(num_samples,), dtype=h5py.string_dtype(encoding='utf-8'))
 
         for i, sample in enumerate(selected_images):
             if isinstance(sample, str):
@@ -230,7 +237,8 @@ class PhotoRotateDatasetNew(Dataset):
                 raise TypeError("type not supported")
 
             processed_image = image_processor.process(image)
-            self.save(
+            cls.save(
+                file_name,
                 i,
                 Sample(
                     image=processed_image.image,
@@ -244,8 +252,11 @@ class PhotoRotateDatasetNew(Dataset):
 
         print("Done processing images.               ")
 
-    def save(self, index, sample: Sample):
-        with h5py.File(self.file_name, "a") as f:
+        return cls(file_name                        )
+
+    @classmethod
+    def save(cls, file_name, index, sample: Sample):
+        with h5py.File(file_name, "a") as f:
             f["features"][index] = sample.image
             f["labels"][index] = sample.label
             f["paths"][index] = sample.path.encode('utf-8')
@@ -253,8 +264,8 @@ class PhotoRotateDatasetNew(Dataset):
     def __getitem__(self, index: int) -> Sample:
         with h5py.File(self.file_name, "r") as f:
             return Sample(
-                image=f["features"][index],
-                label=f["labels"][index],
+                image=torch.from_numpy(f["features"][index]).float(),
+                label=torch.tensor(f["labels"][index]).long(),
                 path=f["paths"][index],
             )
 

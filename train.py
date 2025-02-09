@@ -55,10 +55,10 @@ class Trainer:
                 callback.on_batch_begin()
 
             model_input = inputs.to(self.device)
-            ground_truth = labels.to(self.device)
+            ground_truth = labels.to(self.device).squeeze()
 
             output = self.model(model_input)
-
+            
             loss = self.loss_function(output, ground_truth)
             total_loss.update(loss)
 
@@ -78,7 +78,7 @@ class Trainer:
 
         for inputs, labels in self.test_data:
             model_input = inputs.to(self.device)
-            ground_truth = labels.to(self.device)
+            ground_truth = labels.to(self.device).squeeze()
 
             output = self.model(model_input)
             for tester in self.tester:
