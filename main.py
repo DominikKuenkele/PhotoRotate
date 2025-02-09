@@ -1,15 +1,52 @@
 import argparse
-import pickle
 from test import MulticlassAccuracy, MulticlassConfusionMatrix
 
 import torch
+from attr import dataclass
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
 from callbacks import ConsoleLogger, FileLogger, ModelSaver
-from datasets import PhotoRotateDataset, PhotoRotateDatasetH5, Sample
-from models import PhotoRotateModel, ResnetFeatureExtractor
+from datasets import PhotoRotateDatasetH5, Sample
+from models import PhotoRotateAttentionModel, PhotoRotateModel, ResnetFeatureExtractor
 from train import Trainer
+
+
+@dataclass
+class ModelConfiguration:
+    dataset: torch.utils.data.Dataset
+    model: nn.Module
+    model_args: dict
+
+
+CONFIGURATIONS: dict[str, ModelConfiguration] = {
+    "simple": ModelConfiguration(
+        dataset=PhotoRotateDatasetH5,
+        model=PhotoRotateModel,
+        model_args={
+            "resnet": ResnetFeatureExtractor(
+                pretrained=True,
+                fine_tune=False,
+                number_blocks=4,
+                avgpool=False,
+                fc=False,
+            ),
+        },
+    ),
+    "attention": ModelConfiguration(
+        dataset=PhotoRotateDatasetH5,
+        model=PhotoRotateAttentionModel,
+        model_args={
+            "resnet": ResnetFeatureExtractor(
+                pretrained=True,
+                fine_tune=False,
+                number_blocks=4,
+                avgpool=False,
+                fc=False,
+            ),
+        },
+    ),
+}
 
 
 def collate_fn(samples: list[Sample]):
@@ -24,7 +61,9 @@ def collate_fn(samples: list[Sample]):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
     # -- DATASET --
+    parser.add_argument("--config", choices=CONFIGURATIONS.keys(), help="configuration")
     parser.add_argument(
         "--dataset_file",
         type=str,
@@ -61,7 +100,9 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    dataset = PhotoRotateDatasetH5(args.dataset_file)
+    config = CONFIGURATIONS[args.config]
+
+    dataset = config.dataset(args.dataset_file)
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(
@@ -83,16 +124,9 @@ if __name__ == "__main__":
         collate_fn=collate_fn,
     )
 
-    model = PhotoRotateModel(
-        ResnetFeatureExtractor(
-            pretrained=True,
-            fine_tune=False,
-            number_blocks=4,
-            avgpool=False,
-            fc=False,
-        ),
-        args.dropout,
-    ).to(device)
+    model_args = config.model_args
+    model_args["dropout"] = args.dropout
+    model = config.model(**model_args).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     loss_function = nn.CrossEntropyLoss()
@@ -109,11 +143,28 @@ if __name__ == "__main__":
             ConsoleLogger(),
             FileLogger(
                 args.out_dir,
-                [dataset.name, len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
+                [
+                    args.config,
+                    dataset.name,
+                    len(dataset),
+                    args.epochs,
+                    args.lr,
+                    args.dropout,
+                    args.suffix,
+                ],
             ),
             ModelSaver(
                 args.out_dir,
-                [dataset.name, len(dataset), args.epochs, args.lr, args.dropout, args.suffix],
+                [
+                    args.config,
+                    dataset.name,
+                    len(dataset),
+                    args.epochs,
+                    args.lr,
+                    args.dropout,
+                    args.suffix,
+                ],
+                as_state_dict=False,
             ),
         ],
     )
